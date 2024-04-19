@@ -6,7 +6,6 @@ const bookmarkMessage = document.getElementById('bookmark-message');
 const cookeList = document.getElementById('cookie-list');
 const searchResultMessage = document.getElementById('search-result');
 
-
 (async function initPopupWindow() {
     let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
@@ -27,12 +26,10 @@ async function handleFormSubmit(event) {
     event.preventDefault();
 
     clearMessage();
-    clearBookmark();
     clearList();
     clearSearchResultMessage();
-    // setStoredCookie();
 
-    let message = await searchCookies(domainInput.value, nameInput.value);
+    await searchCookies(domainInput.value, nameInput.value);
 }
 
 /**
@@ -44,16 +41,15 @@ async function handleFormSubmit(event) {
 async function searchCookies(domain, name) {
     if(!domain && !name) return 'No domain or name provided';
 
-    let totalCookies = 0;
     try {
-        // const cookies = await chrome.cookies.getAll({ name: 'connect.sid' });
         const searchObject = {};
         if(domain) searchObject.url = domain;
         if(name) searchObject.name = name;
         const cookies = await chrome.cookies.getAll(searchObject);
 
         if (cookies.length === 0) {
-            return 'No cookies found';
+            setSearchResultMessage(`No cookies found`);
+            return;
         }
 
         setSearchResultMessage(`Found ${cookies.length} cookie(s)`);
