@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+<head>
+    <script src="popup.js" type="module"></script>
+</head>
+<body>
+<form id="control-row">
+    <label for="domain-input">Domain:</label>
+    <input type="text" id="domain-input" />
+    <label for="name-input">Name:</label>
+    <input type="text" id="name-input" />
+    <br />
+    <button id="go">Search Cookies</button>
+</form>
+<br />
+<span id="search-result" hidden></span>
+<ul id="cookie-list"></ul>
+<br />
+<span id="message" hidden></span>
+<span>bookmark</span>
+<button id="save" onclick="saveCookies()">Save Cookies</button>
+<span id="bookmark-message" hidden></span>
+</body>
+</html>
