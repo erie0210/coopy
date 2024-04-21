@@ -1,9 +1,11 @@
 const $searchForm = document.getElementById("search-form");
 const domainInput = document.getElementById("domain-input");
 const nameInput = document.getElementById("name-input");
-const $bookmarkList = document.getElementById("bookmark-list");
+// const $bookmarkList = document.getElementById("bookmark-list");
 const $searchResultTable = document.getElementById("search-result-table");
-const saveBtn = document.getElementById("save-btn");
+const $saveBtn = document.getElementById("save-btn");
+const $removeBtn = document.getElementById("remove-btn");
+const $clearBtn = document.getElementById("clear-btn");
 
 (async function initPopupWindow() {
   let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -12,6 +14,7 @@ const saveBtn = document.getElementById("save-btn");
     try {
       let url = new URL(tab.url);
       domainInput.value = url;
+      await listBookmark();
       await searchCookies(domainInput.value, nameInput.value);
     } catch {}
   }
@@ -21,19 +24,33 @@ const saveBtn = document.getElementById("save-btn");
 
 $searchForm.addEventListener("submit", handleFormSubmit);
 $searchResultTable.addEventListener("click", (event) => {
-  console.log(event);
   const $CopyBtn = event.target.closest(".value-copy");
   if ($CopyBtn) {
-    console.log($CopyBtn.dataset);
     navigator.clipboard.writeText($CopyBtn.dataset.value).then(() => {
-      alert("Copied", $CopyBtn.dataset.value);
+      // alert("Copied", $CopyBtn.dataset.value);
     });
   }
 });
-saveBtn.addEventListener("click", async () => {
-  setStoredCookie();
-  const result = await getStoredCookie();
+
+$searchResultTable.addEventListener("click", async (event) => {
+  const $BookmarkBtn = event.target.closest(".row-bookmark");
+  if ($BookmarkBtn) {
+    const cookieKey = $BookmarkBtn.dataset.domain + $BookmarkBtn.dataset.name;
+    const cookieValue = $BookmarkBtn.dataset.value;
+    await bookmarkCookie(cookieKey, cookieValue);
+    await listBookmark();
+  }
 });
+
+// $saveBtn.addEventListener("click", async () => {});
+// $removeBtn.addEventListener("click", async () => {
+//   removeBookmark();
+//   await listBookmark();
+// });
+// $clearBtn.addEventListener("click", async () => {
+//   clearBookmark();
+//   await listBookmark();
+// });
 
 async function handleFormSubmit(event) {
   event.preventDefault();
@@ -48,8 +65,9 @@ async function searchCookies(domain, name) {
     if (domain) searchObject.url = domain;
     if (name) searchObject.name = name;
     const cookies = await chrome.cookies.getAll(searchObject);
+    const orderedCookies = cookies.sort((a, b) => a.name.localeCompare(b.name));
 
-    return drawCookieList(cookies);
+    return drawCookieList(orderedCookies);
   } catch (error) {
     return `Unexpected error: ${error.message}`;
   }
@@ -69,18 +87,16 @@ async function drawCookieList(cookies) {
     scrollY: 400,
     scrollCollapse: true,
     columns: [
-      {
-        render: (data, type, row) => {
-          return `<button class="table-tool-btn row-bookmark" ><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 384 512"><path d="M0 48C0 21.5 21.5 0 48 0l0 48V441.4l130.1-92.9c8.3-6 19.6-6 27.9 0L336 441.4V48H48V0H336c26.5 0 48 21.5 48 48V488c0 9-5 17.2-13 21.3s-17.6 3.4-24.9-1.8L192 397.5 37.9 507.5c-7.3 5.2-16.9 5.9-24.9 1.8S0 497 0 488V48z"/></svg></button>`;
-        },
-      },
+      // {
+      //   render: (data, type, row) => {
+      //     return `<button class="table-tool-btn row-bookmark" data-name="${row.name}" data-domain="${row.domain}" data-value="${row.value}" ><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 384 512"><path d="M0 48C0 21.5 21.5 0 48 0l0 48V441.4l130.1-92.9c8.3-6 19.6-6 27.9 0L336 441.4V48H48V0H336c26.5 0 48 21.5 48 48V488c0 9-5 17.2-13 21.3s-17.6 3.4-24.9-1.8L192 397.5 37.9 507.5c-7.3 5.2-16.9 5.9-24.9 1.8S0 497 0 488V48z"/></svg></button>`;
+      //   },
+      // },
       {
         data: "name",
-        // title: "Name",
       },
       {
         data: "domain",
-        // title: "Domain",
       },
       {
         render: (data, type, row) => {
@@ -89,11 +105,9 @@ async function drawCookieList(cookies) {
       },
       {
         data: "value",
-        // title: "Value",
       },
       {
         data: "path",
-        // title: "Path",
       },
     ],
   });
@@ -110,25 +124,45 @@ function deleteCookie(cookie) {
   });
 }
 
-function setStoredCookie(cookie) {
-  chrome.storage.local.set({ data1234512: "abababba" }).then(() => {
+/**
+ * bookmark cookie
+ */
+
+async function bookmarkCookie(cookieKey, cookieValue) {
+  chrome.storage.local.set({ [`${cookieKey}`]: cookieValue }).then(() => {
     console.log("Value is set");
   });
 }
 
-async function getStoredCookie() {
-  let results = "";
-  const result = await chrome.storage.local.get(["data1234512"]);
-  return JSON.stringify(result);
+function clearBookmark() {
+  chrome.storage.local.clear().then(() => {
+    console.log("Value is cleared");
+  });
+}
+
+function removeBookmark(cookieKey) {
+  chrome.storage.local.remove("data23").then(() => {
+    console.log("Value is removed");
+  });
 }
 
 function setBookmarkMessage(str) {
-  $bookmarkList.textContent = str;
+  // $bookmarkList.textContent = str;
 }
 
-function clearBookmark() {
-  $bookmarkList.textContent = "";
+async function listBookmark() {
+  clearBookmarkMessage();
+  const result = await chrome.storage.local.get(null);
+  setBookmarkMessage(JSON.stringify(result));
 }
+
+function clearBookmarkMessage() {
+  // $bookmarkList.textContent = "";
+}
+
+/**
+ * search cookie
+ */
 
 function setSearchResultMessage(str) {
   $searchResultMessage.textContent = str;
