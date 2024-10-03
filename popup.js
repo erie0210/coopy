@@ -6,6 +6,9 @@ const $searchResultTable = document.getElementById("search-result-table");
 const $saveBtn = document.getElementById("save-btn");
 const $removeBtn = document.getElementById("remove-btn");
 const $clearBtn = document.getElementById("clear-btn");
+const $searchCheckbox = document.getElementById("search-checkbox");
+
+let isDecodeEnabled = true;
 
 (async function initPopupWindow() {
   let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -42,6 +45,11 @@ $searchResultTable.addEventListener("click", async (event) => {
   }
 });
 
+$searchCheckbox.addEventListener("change", async () => {
+  isDecodeEnabled = $searchCheckbox.checked;
+  await searchCookies(domainInput.value, nameInput.value);
+});
+
 // $saveBtn.addEventListener("click", async () => {});
 // $removeBtn.addEventListener("click", async () => {
 //   removeBookmark();
@@ -63,9 +71,14 @@ async function searchCookies(domain, name) {
   try {
     const searchObject = {};
     if (domain) searchObject.url = domain;
-    if (name) searchObject.name = name;
+    // if (name) searchObject.name = name;
     const cookies = await chrome.cookies.getAll(searchObject);
-    const orderedCookies = cookies.sort((a, b) => a.name.localeCompare(b.name));
+    const filtered  = name ? cookies.filter(x => x.name.includes(name)) : cookies;
+    const decoded  = isDecodeEnabled ? filtered.map(x => ({
+      ...x,
+      value: decodeURIComponent(x.value)
+    })) : filtered;
+    const orderedCookies = decoded.sort((a, b) => a.name.localeCompare(b.name));
 
     return drawCookieList(orderedCookies);
   } catch (error) {
