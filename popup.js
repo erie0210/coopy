@@ -7,6 +7,7 @@ const $saveBtn = document.getElementById("save-btn");
 const $removeBtn = document.getElementById("remove-btn");
 const $clearBtn = document.getElementById("clear-btn");
 const $searchCheckbox = document.getElementById("search-checkbox");
+const $newCookieBtn = document.getElementById("new-cookie-btn");
 
 let isDecodeEnabled = true;
 
@@ -24,6 +25,12 @@ let isDecodeEnabled = true;
 
   nameInput.focus();
 })();
+
+$newCookieBtn.addEventListener("click", async () => {
+  chrome.action.setPopup({
+    popup: "new-cookie.html",
+  });
+});
 
 $searchForm.addEventListener("submit", handleFormSubmit);
 $searchResultTable.addEventListener("click", (event) => {
