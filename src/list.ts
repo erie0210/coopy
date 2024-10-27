@@ -39,11 +39,31 @@ export function setupList() {
     await searchCookies(domainInput.value, nameInput.value);
   });
 
+  let currentMessage: HTMLElement | null = null;
+  let timeoutId: number | null = null;
+
   $searchResultTable.addEventListener("click", (event) => {
     const $CopyBtn: any = (event.target as HTMLElement)?.closest(".value-copy");
     if ($CopyBtn) {
       navigator.clipboard.writeText($CopyBtn.dataset.value).then(() => {
-        // alert("Copied", $CopyBtn.dataset.value);
+        if (currentMessage) {
+          document.body.removeChild(currentMessage);
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+        }
+
+        currentMessage = document.createElement("div");
+        currentMessage.className = "copy-message";
+        currentMessage.textContent = `🍪 cookie copied: ${$CopyBtn.dataset.name}`;
+        document.body.appendChild(currentMessage);
+
+        timeoutId = setTimeout(() => {
+          if (currentMessage) {
+            document.body.removeChild(currentMessage);
+            currentMessage = null;
+          }
+        }, 3000);
       });
     }
   });
@@ -104,7 +124,7 @@ export function setupList() {
         },
         {
           render: (_data: any, _type: any, row: any) => {
-            return `<button class="table-tool-btn value-copy" data-value="${row.value}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 448 512"><path d="M384 336H192c-8.8 0-16-7.2-16-16V64c0-8.8 7.2-16 16-16l140.1 0L400 115.9V320c0 8.8-7.2 16-16 16zM192 384H384c35.3 0 64-28.7 64-64V115.9c0-12.7-5.1-24.9-14.1-33.9L366.1 14.1c-9-9-21.2-14.1-33.9-14.1H192c-35.3 0-64 28.7-64 64V320c0 35.3 28.7 64 64 64zM64 128c-35.3 0-64 28.7-64 64V448c0 35.3 28.7 64 64 64H256c35.3 0 64-28.7 64-64V416H272v32c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192c0-8.8 7.2-16 16-16H96V128H64z"/></svg></button>`;
+            return `<button class="table-tool-btn value-copy" data-value="${row.value}" data-name="${row.name}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 448 512"><path d="M384 336H192c-8.8 0-16-7.2-16-16V64c0-8.8 7.2-16 16-16l140.1 0L400 115.9V320c0 8.8-7.2 16-16 16zM192 384H384c35.3 0 64-28.7 64-64V115.9c0-12.7-5.1-24.9-14.1-33.9L366.1 14.1c-9-9-21.2-14.1-33.9-14.1H192c-35.3 0-64 28.7-64 64V320c0 35.3 28.7 64 64 64zM64 128c-35.3 0-64 28.7-64 64V448c0 35.3 28.7 64 64 64H256c35.3 0 64-28.7 64-64V416H272v32c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192c0-8.8 7.2-16 16-16H96V128H64z"/></svg></button>`;
           },
         },
         {
