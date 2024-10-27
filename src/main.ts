@@ -1,7 +1,7 @@
-import './style.css'
-import {setupList} from "./list.ts";
+import "./style.css";
+import { setupList } from "./list.ts";
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div id="header">
     <!-- <h3>bookmark</h3> -->
     <!-- <div id="bookmark-list"></div> -->
@@ -39,6 +39,6 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <!-- <button id="save-btn">Save Cookies</button>
   <button id="remove-btn">Remove Cookies</button>
   <button id="clear-btn">Clear Cookies</button> -->
-`
+`;
 
 setupList();
