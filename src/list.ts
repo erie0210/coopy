@@ -1,6 +1,6 @@
 import GetAllDetails = chrome.cookies.GetAllDetails;
 import Cookie = chrome.cookies.Cookie;
-import DataTable, { Api } from "datatables.net-dt";
+import DataTable, { type Api } from "datatables.net-dt";
 
 export function setupList() {
   const $searchForm = document.getElementById("search-form") as HTMLFormElement;
