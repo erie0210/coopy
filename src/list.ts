@@ -68,6 +68,18 @@ export function setupList() {
     }
   });
 
+  $searchResultTable.addEventListener("click", async (event) => {
+    const $deleteBtn: any = (event.target as HTMLElement)?.closest(
+      ".delete-cookie",
+    );
+    if ($deleteBtn) {
+      const name = $deleteBtn.dataset.name;
+
+      await chrome.cookies.remove({ name, url: domainInput.value });
+      await searchCookies(domainInput.value, nameInput.value);
+    }
+  });
+
   $searchCheckbox.addEventListener("change", async () => {
     isDecodeEnabled = $searchCheckbox.checked;
     await searchCookies(domainInput.value, nameInput.value);
@@ -116,6 +128,11 @@ export function setupList() {
       scrollY: "400",
       scrollCollapse: true,
       columns: [
+        {
+          render: (_data: any, _type: any, row: any) => {
+            return `<button class="table-tool-btn delete-cookie" data-name="${row.name}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 448 512"><path d="M135.2 17.7C138.8 7.1 148.8 0 160 0H288c11.2 0 21.2 7.1 24.8 17.7L320 32H432c8.8 0 16 7.2 16 16s-7.2 16-16 16H416V96c0 17.7-14.3 32-32 32H64c-17.7 0-32-14.3-32-32V64H16c-8.8 0-16-7.2-16-16s7.2-16 16-16H128L135.2 17.7zM64 128H384V64H64V128zM32 160H416c17.7 0 32 14.3 32 32V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V192C0 174.3 14.3 160 32 160zM96 224c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16s16-7.2 16-16V240C112 231.2 104.8 224 96 224zM192 224c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16s16-7.2 16-16V240C208 231.2 200.8 224 192 224zM288 224c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16s16-7.2 16-16V240C304 231.2 296.8 224 288 224zM384 224c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16s16-7.2 16-16V240C400 231.2 392.8 224 384 224z"/></svg></button>`;
+          },
+        },
         {
           data: "name",
         },
