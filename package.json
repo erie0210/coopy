@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "tsc && vite build --mode development",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "format": "biome format --write",
+    "lint": "biome lint --fix"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@types/chrome": "^0.0.279",
     "typescript": "~5.6.2",
     "vite": "^5.4.9"
